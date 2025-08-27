@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "4a": "tsc Module1Activity4A.ts && node Module1Activity4A.js",
+    "4b": "tsc Module1Activity4B.ts && node Module1Activity4B.js",
+    "testA": "tsc Module1Activity4ATests.ts && node Module1Activity4ATests.js",
+    "testB": "tsc Module1Activity4BTests.ts && node Module1Activity4BTests.js"
+  },
+  "dependencies": {
+    "tsc": "^2.0.4",
+    "typescript": "^5.9.2"
+  }
+}

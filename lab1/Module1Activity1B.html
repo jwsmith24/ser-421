@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>HTML5 Input Forms</title>
+</head>
+
+<body>
+    <header>
+        <h3>HTML5 Input Forms</h3>
+    </header>
+    <section style="text-align: justify;font-size: 12px;font-family: sans-serif;">
+        <!--Form Begins-->
+        <form name="html5_input_types" method="post" action="https://postman-echo.com/post">
+            
+            <p>
+                <label for="routingNumber">Routing Number</label>
+<!--                size 30 to fit all 27 characters of a valid input plus a little extra space-->
+                <input type="text" name="jwsmit24_RTN" id="routingNumber" pattern="^\d{9}-\d{12}-\d{4}$" size="30" required>
+            </p>
+
+			<!--Submit & Reset Button -->
+			<button type="submit" value="Submit">Submit</button>
+			<button type="reset" value="Reset">Reset</button>
+		</form>	<!--Form Ends-->
+	</section>
+</body>
+</html>

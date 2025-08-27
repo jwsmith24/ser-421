@@ -1,0 +1,84 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.app {
+    display: grid;
+    height: 100svh;
+    width: 100svw;
+    min-width: 100svw;
+    grid-template-rows: auto 1fr auto;
+    font-family: "Roboto Light", sans-serif;
+    background-color: whitesmoke;
+
+
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: auto;
+    overflow-x: auto
+}
+
+/*2 columns on medium screen */
+@media (min-width: 550px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/*3 columns on large screens*/
+@media (min-width: 800px) {
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.header, .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    min-width: 100%;
+    font-size: x-large;
+    border: 2px solid gray;
+
+}
+
+.card {
+    /*asu maroon (ish)*/
+    border: 2px solid rgba(140, 29, 64, .75);
+    border-radius: 5px;
+    padding: 1rem;
+    max-width: 100%;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    justify-content: left;
+}
+
+ol {
+    display: grid;
+    gap: 1rem;
+}
+
+
+
+.asu-logo {
+    width: 120px;
+
+}
+
+.footer {
+    margin-top: 1rem;
+    font-size: small;
+    align-items: end;
+}
+
+
+
+

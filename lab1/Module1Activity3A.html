@@ -1,0 +1,248 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>JS3 Race1 Example</title>
+    <script>console.log('HEAD')
+
+    </script>
+    <style>
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+            height: 100%;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        .biggerFont {
+            font-size: 18px;
+        }
+
+        .smallerFont {
+            font-size: 14px;
+        }
+
+        .leftAlign {
+            text-align: left;
+        }
+
+        .topAlign {
+            vertical-align: top;
+        }
+
+        .rightAlign {
+            text-align: right;
+        }
+
+        .centerAlign {
+            text-align: center;
+        }
+
+        .contactInfo {
+            width: 25%;
+        }
+
+        .blogEntries {
+            width: 35%;
+        }
+
+        .tweets {
+            width: 40%;
+        }
+
+        .asuLogo {
+            width: 33%;
+        }
+
+        .copyright {
+            width: 34%;
+        }
+
+        .header {
+            width: 80%;
+        }
+
+        .smallImage {
+            width: 10%;
+        }
+
+        .bioText {
+            width: 90%;
+        }
+    </style>
+</head>
+
+
+
+<!-- NEW: This example outputs when different DOM events happen -->
+<!-- SLEEPY -->
+<body onload='console.log("ONLOAD")' onloadstart="console.log('ONLOADSTART')" class="container">
+
+<table>
+    <tr>
+        <td class="tweets" ><img class="asuLogo leftAlign" src="images/asulogo.jpg"></td>
+        <td class="centerAlign header biggerFont">
+            Kevin A. Gary, Ph.D.
+        </td>
+        <td class="rightAlign smallImage"><img src="images/asulogo.jpg"></td>
+    </tr>
+    <tr>
+        <td ><img class="smallImage leftAlign" src="images/KevinAGarySmall.jpg" alt=""></td>
+        <td colspan="2" class="bioText">
+            Welcome to my homepage! I have been on the faculty at ASU since 2004, tenured in 2010.
+            I believe in creating challenging learning experiences for my students that prepares
+            them for industry, the profession, and life! I do this through
+            hands-on, project-based teaching in the
+            <a href="https://softwareenterprise.asu.edu">Software Enterprise</a>, use-inspired
+            applied research (particularly in e-Learning and healthcare), and applying
+            industry best practices in the classroom. My primary area is
+            "Software Engineering", but my interests vary from enterprise computing to mHealth to
+            agile and open source software engineering.
+        </td>
+    </tr>
+</table>
+<!-- SLEEPY -->
+<script>console.log('Finished table 1')</script>
+<br/>
+<table>
+    <tr>
+        <td class="leftAlign topAlign contactInfo" >
+            <strong class="biggerFont">Contact Info:</strong>
+
+                <p class="smallerFont">
+                    Associate Professor<br/>
+                    <a href="http://cidse.engineering.asu.edu">The School of Computing, Informatics, and Decision
+                        Systems Engineering</a><br/>
+                    <a href="http://engineering.asu.edu/">The Ira A. Fulton Schools of Engineering</a><br/>
+                    <a href="http://poly.asu.edu">Software Engineering Program Faculty, Polytechnic Campus</a><br/>
+                    7171 Sonoran Arroyo Mall<br/>
+                    Peralta 230C <br/>
+                    Mesa Arizona 85212<br/>
+                    Phone: <a href="tel:1-480-727-1373">(480)727-1373</a><br/>
+                    Email:<a href="mailto:kgary@asu.edu">kgary@asu.edu</a><br/>
+                    Web: <a href="http://www.public.asu.edu/~kgary">homepage</a>, <a
+                        href="http://drgarysblog.blogspot.com">blog</a> <br/>
+                    <br/>
+                    Twitter: <a class="twitter-follow-button" data-show-count="false"
+                                href="https://twitter.com/drkevingary">Follow @drkevingary</a>
+                    <br/>
+                    <br/>
+                </p>
+        </td>
+        <td class="leftAlign topAlign blogEntries">
+
+                <strong class="biggerFont">Blog entries:</strong><br/>
+
+
+                <script language="JavaScript"
+                        src="http://www.feed2js.org//feed2js.php?src=http%3A%2F%2Fdrgarysblog.blogspot.com%2Ffeeds%2Fposts%2Fdefault&amp;chan=title&amp;num=3&amp;desc=150&amp;date=y&amp;targ=y&amp;pc=y&amp;html=p"
+                        type="text/javascript"></script>
+
+                <noscript>
+                    <a href="http://www.feed2js.org//feed2js.php?src=http%3A%2F%2Fdrgarysblog.blogspot.com%2Ffeeds%2Fposts%2Fdefault&amp;chan=title&amp;num=3&amp;desc=200&amp;date=y&amp;targ=y&amp;pc=y&amp;html=y">View
+                        RSS feed</a>
+                </noscript>
+
+        </td>
+        <td class="topAlign leftAlign tweets">
+
+                <strong class="biggerFont">My tweets:</strong><br/>
+
+            <a class="twitter-timeline" data-widget-id="390204299604541440" href="https://twitter.com/drkevingary">Tweets
+                by @drkevingary</a>
+
+            <script>!function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
+                if (!d.getElementById(id)) {
+                    js = d.createElement(s);
+                    js.id = id;
+                    js.src = p + "://platform.twitter.com/widgets.js";
+                    fjs.parentNode.insertBefore(js, fjs);
+                }
+            }(document, "script", "twitter-wjs");</script>
+
+            <br/>
+            <!-- SLEEPY -->
+            <script>console.log('Middle table 2')</script>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1" class="topAlign">
+            <strong class="biggerFont">Links:</strong><br/>
+            <ul>
+                <li><a href="./docs/CVfull.pdf">Current Vitae (including pubs)</a></li>
+                <li><a href="./docs/ASUGradResearch100212.pdf">Graduate seminar presentation of research projects
+                    (2012)</a></li>
+                <li><a href="http://www.igstk.org">IGSTK</a></li>
+                <li><a href="http://softwareenterprise.asu.edu">The Software Enterprise</a></li>
+                <li><a href="http://atic.asu.edu">The Advanced Technology Innovation Center (ATIC)</a>
+            </ul>
+            <br/>
+            <a href="http://www.nerdtests.com/ft_nq.php">
+                <img alt="I am nerdier than 98% of all people. Are you a nerd? Click here to take the Nerd Test, get geeky images and jokes, and talk on the nerd forum!"
+                     src="http://www.nerdtests.com/images/ft/nq/21991e3bef.gif"></a>
+        </td>
+        <td class="leftAlign topAlign" colspan="2" >
+            <strong class="biggerFont">Selected Publications (see <a href="./docs/CVfull.pdf">CV</a> for full
+                list):</strong><br/>
+
+                <ol>
+                    <li>Gary, K., Kojcev, R., and Cleary, K. “A Systems Integration Architecture for NOTE Surgery”,
+                        Proceedings of the 16th Conference on Software Engineering and Applications (SEA 2012). Las
+                        Vegas, TX, November 2012.
+                    </li>
+                    <li>Gary, K., Kocjev, R., and Cleary, K. “Observations on the Evolving Maturity of Software and
+                        Systems Architecture Supporting Surgical Procedures”, Workshop on Infrastructure, Tools, and
+                        Technologies for System of Systems of Medical Devices (SoSMD 2011). Kansas, November 2011.
+                    </li>
+                    <li>Gary, K., Kokoori, S., Muffih, B., Enquobahrie, A., Cheng, P., Yaniv, Z., and Cleary, K. “Agile
+                        Methods for Safety-Critical Open Source Software”, Software: Practice and Experience, April
+                        2011.
+                    </li>
+                    <li>Gary, K. The Software Enterprise: Practicing Best Practices in Software Engineering Education,
+                        <i>The International Journal of Engineering Education</i> Special Issue on Trends in Software
+                        Engineering Education, Volume 24, Number 4, July 2008, pp. 705-716.
+                    </li>
+                    <li>Gary, K., The Software Enterprise: Preparing Industry-ready Software Engineers, in <i>Software
+                        Engineering: Effective Teaching and Learning Approaches</i>, Ellis, H., Demurjian, S., and
+                        Naveda, J.F., (eds.), Idea Group Publishing. October 2008.
+                    </li>
+                    <li>Gary, K. and Koehnemann, H. Component-based Deployment for Web Applications: Methods and Issues,
+                        in <i>Software Engineering for Modern Web Applications</i>, Brandon, D. (ed.), Idea Group
+                        Publishing. 2008.
+                    </li>
+                    <li>Gary, K., Blake, B., Ibanez, L., Gobbi, D., Aylward, S., and Cleary, K. IGSTK: An Open Source
+                        Software Platform for Image-Guided Surgery, <i>IEEE Computer Special Issue on software
+                            engineering and application of software-based medical devices and device systems</i>, April
+                        2006.
+                    </li>
+                </ol>
+
+        </td>
+    </tr>
+</table>
+<!-- SLEEPY -->
+<script>console.log('Finished table 2')</script>
+<img height="2px" src="../images/asurib.gif" width="1024" alt=""/>
+<br/>
+<table>
+    <tr>
+        <td ><img class="asuLogo" src="images/asulogo.jpg" alt=""></td>
+        <td class="copyright topAlign centerAlign smallerFont">
+            Copyright &copy; 2013 Kevin A. Gary
+        </td>
+        <td class="rightAlign asuLogo"><img src="images/asulogo.jpg" alt=""></td>
+    </tr>
+</table>
+<script>console.log('Finished table 3')</script>
+</body>
+</html>
