@@ -8,6 +8,7 @@
 document.getElementById("more-results").textContent = "More redundant Results!";
 
 // 1.2: Output the number of <li> elements on the page to the console
+// returns a node list of every element that matches the query that has a length prop
 console.log(document.querySelectorAll("li").length);
 
 
