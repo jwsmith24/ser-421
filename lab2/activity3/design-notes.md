@@ -19,3 +19,5 @@ Local storage vs session storage:
 
 **_Due to the requirement stating conversations with Eliza must persist across browser restarts, 
 local storage is the best fit._**
+
+Key by username

@@ -66,6 +66,7 @@ const sendButton = document.getElementById("sendButton");
 // event listeners
 sendButton.addEventListener("click", (event) => {
     event.preventDefault(); // stop the form from submitting and refreshing the page on click
+    clearTimeout(idleTimer); // reset timer
     greeted ? handleConversation() : handleGreeting();
 })
 

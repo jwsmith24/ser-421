@@ -67,11 +67,37 @@ const sendButton = document.getElementById("sendButton");
 // event listeners
 sendButton.addEventListener("click", (event) => {
     event.preventDefault(); // stop the form from submitting and refreshing the page on click
+    clearTimeout(idleTimer); // reset timer
+
+    if (userInput.value === "") return; // do nothing if there's no input
+
     greeted ? handleConversation() : handleGreeting();
 })
 
+// todo: save conversations to local storage and retrieve on load if prev entries exist
+// key by unique username
+const conversation = [];
 
 
+const buildConversationChunk = (chunk) => {
+    const article =  document.createElement("article");
+
+    const message = document.createElement("p");
+    message.textContent = `${activeUsername}: ${chunk.message}`;
+
+    const answer = document.createElement("p");
+    answer.textContent = `Eliza: ${chunk.answer}`;
+
+    const question = document.createElement("p");
+    question.textContent = `Eliza: ${chunk.question}`;
+
+    article.append(message, answer, question);
+
+    document.getElementById("conversations").appendChild(article);
+
+}
+
+// timer
 function runIdleTimer() {
     clearTimeout(idleTimer); // reset timer
     idleTimer = setTimeout(() => {
@@ -163,9 +189,20 @@ const handleGreeting = () => {
 }
 
 const handleConversation = () => {
+    const message = userInput.value;
     // break up text from user into words (array of strings)
-    const keywords = userInput.value.split(" "); // split each word into an entry
+    const keywords = message.split(" "); // split each word into an entry
     const response = getResponse(keywords);
+
+    // record conversation chunk
+    conversation.push({
+        message: message,
+        answer: response.answer,
+        question: response.question
+    })
+
+    // todo: rebuild the dom in reverse order
+
 
     userQuestion.textContent = `${activeUsername.toUpperCase()}: ` + userInput.value || "";
     elizaAnswer.textContent = `ELIZA: ` + response.answer;
