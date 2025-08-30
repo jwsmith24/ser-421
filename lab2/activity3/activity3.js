@@ -69,19 +69,95 @@ sendButton.addEventListener("click", (event) => {
     event.preventDefault(); // stop the form from submitting and refreshing the page on click
     clearTimeout(idleTimer); // reset timer
 
-    if (userInput.value === "") return; // do nothing if there's no input
+    const input = userInput.value.trim();
+
+    if (!input) return; // do nothing if there's no input
+
+    if (input === '/clear') { // handle /clear command
+        if (activeUsername) {
+            clearConversationForUser(activeUsername);
+            handleClearReset();
+        }
+        clearTextInput();
+        return; // break the action after the rerender
+    }
+
+    // handle /clearall command
+    if (input === '/clearall') {
+        if (confirm("Are you sure you want to delete all conversations?")) {
+            clearAllConversations();
+            handleClearReset();
+        }
+        clearTextInput();
+        return;
+    }
 
     greeted ? handleConversation() : handleGreeting();
 })
 
-// todo: save conversations to local storage and retrieve on load if prev entries exist
-// key by unique username
-const conversation = [];
+// helper to reset state and rerender after a clear
+function handleClearReset() {
+    conversation = [];
+    userQuestion.textContent = '';
+    elizaAnswer.textContent = '';
+    elizaQuestion.textContent = 'Welcome! Please enter your name to begin the conversation';
+    activeUserDisplay.textContent = '';
+    setUsedResponsesAndQuestions();
+    renderConversation();
+}
 
+
+// local storage helpers
+const STORAGE_KEY = "eliza.conversations";
+
+function loadAllConversations() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+        return {};
+    }
+}
+
+function saveAllConversations(conversations) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+}
+
+
+function loadConversationForUser(user) {
+    const conversations = loadAllConversations();
+    // get conversation history if it exists, otherwise return empty array
+    return conversations[user] ? conversations[user] : [];
+}
+
+function saveConversationForUser(user, conversation) {
+    const conversations = loadAllConversations();
+    conversations[user] = conversation;
+    saveAllConversations(conversations);
+}
+
+// called when /clear is sent to eliza
+function clearConversationForUser(user) {
+    const conversations = loadAllConversations();
+    delete conversations[user];
+    saveAllConversations(conversations);
+}
+
+// easy clean up for testing
+function clearAllConversations() {
+    localStorage.removeItem(STORAGE_KEY);
+}
+
+// active conversation (either starts fresh or is written over by local storage)
+let conversation = [];
+
+// track which ones have been used to avoid repeats when randomly choosing one
+const usedResponses = [];
+const usedQuestions = [];
+
+const DICTIONARY_RESPONSE_COUNT = dictionary.entries.reduce((count, entry) => count + entry.answer.length, 0);
+const DICTIONARY_QUESTION_COUNT = dictionary.entries.reduce((count, entry) => count + entry.question.length, 0);
 
 const buildConversationChunk = (chunk) => {
-    console.log("Building chunk for :", chunk);
-
     const article =  document.createElement("article");
 
     if (chunk.message !== '') {
@@ -103,7 +179,7 @@ const buildConversationChunk = (chunk) => {
     }
 
     // append new chunk to the conversation element
-    if (article.children) {
+    if (article.children.length > 0) {
         const spacer = document.createElement("p");
         spacer.textContent = `---${chunk.timestamp}---`
         article.append(spacer);
@@ -124,7 +200,7 @@ function renderConversation() {
     }
 }
 
-// timer
+// timer to alert user if 10 seconds go by without a response
 function runIdleTimer() {
     clearTimeout(idleTimer); // reset timer
     idleTimer = setTimeout(() => {
@@ -179,9 +255,25 @@ const getDialogMessage = (name) => {
     return options[randomIndex(options.length)];
 }
 
+// set active user and load in conversation history
 const setUsername = (name) => {
     activeUsername = name;
     activeUserDisplay.textContent = `Active user: ${activeUsername}`;
+
+    // load saved history
+    conversation = loadConversationForUser(activeUsername);
+    setUsedResponsesAndQuestions();
+    renderConversation();
+}
+
+// helper to reset conversation-specific state
+function setUsedResponsesAndQuestions() {
+    usedResponses.length = 0;
+    usedQuestions.length = 0; // reset arrays
+    for (const chunk of conversation) {
+        if (chunk.answer) usedResponses.push(chunk.answer);
+        if (chunk.question) usedQuestions.push(chunk.question);
+    }
 }
 
 
@@ -192,17 +284,38 @@ const getResponse = (keywords) => {
     // use first match for simplicity and select answer/question randomly from the options
     if (matchedEntry) {
         console.log("matched:", matchedEntry)
+        // get answer and question from matched entry
+        const answer = matchedEntry.answer[randomIndex(matchedEntry.answer.length)];
+        const question = matchedEntry.question[randomIndex(matchedEntry.question.length)]
+        // add to the list of used responses and questions
+        usedResponses.push(answer);
+        usedQuestions.push(question);
         return {
-            answer: matchedEntry.answer[randomIndex(matchedEntry.answer.length)],
-            question: matchedEntry.question[randomIndex(matchedEntry.question.length)]
+            answer,
+            question
         }
     } else {
         // if there aren't any keyword matches, just pick an answer/question randomly from the dictionary
-        const randomEntry = dictionary.entries[randomIndex(dictionary.entries.length)];
+        let randomEntry = dictionary.entries[randomIndex(dictionary.entries.length)];
+        let answer = randomEntry.answer[randomIndex(randomEntry.answer.length)];
+        let question = randomEntry.question[randomIndex(randomEntry.question.length)];
 
+        // check to make sure the random choices haven't been used or if everything has been used at least once
+        let tries = 0; // limit tries before just picking a random one even if it has been used before to avoid hangups
+        while (usedResponses.length < DICTIONARY_RESPONSE_COUNT && usedResponses.includes(answer) ||
+            (usedQuestions.length < DICTIONARY_QUESTION_COUNT && usedQuestions.includes(question))
+            & tries < 100) {
+            randomEntry = dictionary.entries[randomIndex(dictionary.entries.length)];
+            answer = randomEntry.answer[randomIndex(randomEntry.answer.length)];
+            question = randomEntry.question[randomIndex(randomEntry.question.length)];
+            tries++;
+        }
+
+        usedResponses.push(answer);
+        usedQuestions.push(question);
         return {
-            answer: randomEntry.answer[randomIndex(randomEntry.answer.length)],
-            question: randomEntry.question[randomIndex(randomEntry.question.length)]
+            answer,
+            question
         }
     }
 }
@@ -211,12 +324,15 @@ const getResponse = (keywords) => {
 const handleGreeting = () => {
     const name = userInput.value.trim() || "user"; // fallback to default user
     setUsername(name);
+
     elizaQuestion.textContent = getGreeting(activeUsername);
+
     clearTextInput();
 }
 
 const addConversationChunk = (chunk) => {
     conversation.push(chunk);
+    saveConversationForUser(activeUsername, conversation); // save updates to local storage
     renderConversation(); // refresh conversation element
 }
 
