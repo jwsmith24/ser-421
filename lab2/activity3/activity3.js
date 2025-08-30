@@ -62,7 +62,7 @@ const elizaQuestion = document.getElementById("elizaQuestion");
 const elizaAnswer = document.getElementById("elizaAnswer");
 const userInput = document.getElementById("userInput");
 const sendButton = document.getElementById("sendButton");
-
+const conversationHistory = document.getElementById("conversations");
 
 // event listeners
 sendButton.addEventListener("click", (event) => {
@@ -80,21 +80,48 @@ const conversation = [];
 
 
 const buildConversationChunk = (chunk) => {
+    console.log("Building chunk for :", chunk);
+
     const article =  document.createElement("article");
 
-    const message = document.createElement("p");
-    message.textContent = `${activeUsername}: ${chunk.message}`;
+    if (chunk.message !== '') {
+        const message = document.createElement("p");
+        message.textContent = `${activeUsername}: ${chunk.message}`;
+        article.append(message);
+    }
 
-    const answer = document.createElement("p");
-    answer.textContent = `Eliza: ${chunk.answer}`;
+    if  (chunk.answer !== '') {
+        const answer = document.createElement("p");
+        answer.textContent = `Eliza: ${chunk.answer}`;
+        article.append(answer);
+    }
 
-    const question = document.createElement("p");
-    question.textContent = `Eliza: ${chunk.question}`;
+    if (chunk.question !== '') {
+        const question = document.createElement("p");
+        question.textContent = `Eliza: ${chunk.question}`;
+        article.append(question);
+    }
 
-    article.append(message, answer, question);
+    // append new chunk to the conversation element
+    if (article.children) {
+        const spacer = document.createElement("p");
+        spacer.textContent = `---${chunk.timestamp}---`
+        article.append(spacer);
+        conversationHistory.appendChild(article);
+    }
 
-    document.getElementById("conversations").appendChild(article);
 
+}
+
+function renderConversation() {
+    // clear current conversation element
+    conversationHistory.innerHTML = "";
+
+    console.log("Active conversation: ", conversation)
+    // rerender the conversation chunks in reverse order (newest first)
+    for(let i = conversation.length - 1; i >= 0; i--) {
+        buildConversationChunk(conversation[i]);
+    }
 }
 
 // timer
@@ -188,22 +215,28 @@ const handleGreeting = () => {
     clearTextInput();
 }
 
+const addConversationChunk = (chunk) => {
+    conversation.push(chunk);
+    renderConversation(); // refresh conversation element
+}
+
 const handleConversation = () => {
     const message = userInput.value;
     // break up text from user into words (array of strings)
     const keywords = message.split(" "); // split each word into an entry
     const response = getResponse(keywords);
 
-    // record conversation chunk
-    conversation.push({
-        message: message,
-        answer: response.answer,
-        question: response.question
+    // timestamp
+    const now = new Date().toLocaleString();
+    // record last message
+    addConversationChunk({
+        message: userQuestion.textContent,
+        answer: elizaAnswer.textContent,
+        question:elizaQuestion.textContent,
+        timestamp: now
     })
 
-    // todo: rebuild the dom in reverse order
-
-
+    // update fields with current conversation
     userQuestion.textContent = `${activeUsername.toUpperCase()}: ` + userInput.value || "";
     elizaAnswer.textContent = `ELIZA: ` + response.answer;
     elizaQuestion.textContent = "ELIZA: " + response.question;
