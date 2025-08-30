@@ -8,11 +8,14 @@
 <body>
 <div>
     <h1>Eliza Chatbot</h1>
-    <p id="elizaMessage">Welcome! Please enter your name to begin the conversation</p>
+    <h3 id="activeUser"></h3>
+    <p id="userQuestion"></p>
+    <p id="elizaAnswer"></p>
+    <p id="elizaQuestion">Welcome! Please enter your name to begin the conversation</p>
+
     <form>
-        <label for="userInput">Enter your name:</label>
-        <input type="text" name="userInput" id="userInput">
-        <button id="entryButton">Submit</button>
+        <label for="userInput"></label><input type="text" name="userInput" id="userInput">
+        <button id="sendButton" type="button">Send</button>
     </form>
 
 </div>
