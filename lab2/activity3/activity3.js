@@ -179,6 +179,7 @@ const buildConversationChunk = (chunk) => {
     // append new chunk to the conversation element
     if (article.children.length > 0) {
         const spacer = document.createElement("p");
+        // add timestamp to message
         spacer.textContent = `---${chunk.timestamp}---`
         article.append(spacer);
         conversationHistory.appendChild(article);
