@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue Activity 1</title>
+</head>
+<body>
+<div id="app">
+
+<!--    inputs -->
+    <label>1. What is your name?<br>
+    <input type="text" v-model="q1Input" ></label><br><br>
+
+    <label>2. What is your quest?<br>
+        <input type="text" v-model="q2Input" ></label><br><br>
+
+    <label>3. {{ q3Prompt }}<br>
+        <input type="text" v-model="q3Input" ></label><br><br>
+
+
+<!--    messages -->
+    <div v-if="answersContainIdk">Knight: AAAAAAAAAHHHHHHHHHHHH!!!</div>
+    <div v-else-if="allAnswersAreGood">Bridgekeeper: Alright, off you go then.</div>
+<!--    if no condition is met to display a message, empty div to keep the spacing-->
+    <div v-else></div>
+    <button @click="goAgain">Go Again!</button>
+
+</div>
+
+<!--bring in vue-->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!--wire things up with js-->
+<script>
+    const app = Vue.createApp({
+        // state
+        data() {
+            return {
+                q1Input: "",
+                q2Input: "",
+                q3Input: "",
+                q3Options: [
+                    "What is your favorite color?",
+                    "What is the airspeed of an unladen swallow?"
+                ],
+                currentQ3index: 0 // track which question should be displayed,
+            }
+        },
+        computed: {
+            q3Prompt() {
+                return this.q3Options[this.currentQ3index];
+            },
+            // check for idk
+            answersContainIdk() {
+                let answers = [this.q1Input, this.q2Input, this.q3Input];
+                // normalize data
+                answers = answers.map(answer => (answer || "").trim().toLowerCase());
+
+                // perform check
+                return answers.some(answer => answer === "idk");
+            },
+            allAnswersAreGood() {
+                // normalize in one line this time
+                const answers = [this.q1Input, this.q2Input, this.q3Input].map(answer => (answer || "").trim());
+                const isNonEmpty = answers.every(answer => answer.length > 0);
+
+                return isNonEmpty && !this.answersContainIdk;
+            }
+        },
+        methods: {
+            goAgain() {
+                // toggle active index
+                this.currentQ3index = this.currentQ3index === 1 ? 0 : 1;
+                // clear inputs
+                this.q1Input = "";
+                this.q2Input = "";
+                this.q3Input = "";
+            }
+        }
+    })
+    app.mount("#app");
+</script>
+</body>
+</html>
