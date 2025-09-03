@@ -11,7 +11,7 @@
     <input type="range" min="5" max="100" step="5" v-model.number="localAmount">
     <span>{{ localAmount }}</span>
 
-    <div>
+    <div class="buttonRow">
       <button @click="add">Add</button>
 <!--      disable subtract button if the amount is greater than balance-->
       <button @click="subtract" :disabled="localAmount > balance">Subtract</button>
@@ -22,12 +22,19 @@
 
 <style scoped>
 
+.buttonRow {
+  display: flex;
+  gap: 1rem;
+}
+
 .balanceContainer {
   padding: 1rem;
   background-color: lightgray;
   border: 1px solid blue;
   border-radius: 5px;;
   width: 50%;
+  display: grid;
+  gap: 1rem;
 
 }
 </style>
