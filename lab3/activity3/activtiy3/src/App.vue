@@ -1,8 +1,10 @@
-
+<!--App.vue-->
+<!--SER 421 | Lab 2-->
+<!--Jacob Smith (jwsmit24)-->
 
 <!-- app.vue is the single source of truth for all components-->
 <template>
-  <div>
+  <div class="container">
     <HelloWorld :name="username"/>
     <Balance
              v-model:balance="balance"
@@ -12,11 +14,17 @@
     <Currency
       v-model:currencyFrom="currencyFrom"
       v-model:amount="amount"
+      v-model:balance="balance"
     />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.container {
+  padding: 0;
+  margin: 0;
+}
+</style>
 
 <script>
 import HelloWorld from "@/HelloWorld.vue";
@@ -29,7 +37,7 @@ export default {
     return {
       username: "Jake",
       balance: 200,
-      amount: 30,
+      amount: 200,
       currencyFrom: "USD"
     }
   }

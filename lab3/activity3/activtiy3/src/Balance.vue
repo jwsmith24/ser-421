@@ -1,9 +1,9 @@
-
+<!--Balance.vue-->
+<!--SER 421 | Lab 2-->
+<!--Jacob Smith (jwsmit24)-->
 
 <template>
-
-  <div>
-<!--    $30.00 USD-->
+  <div class="balanceContainer">
     <h2>Account Balance: {{ balance }} {{currency}}</h2>
     <p> Amount: {{ localAmount }} {{ currency }}</p>
 
@@ -22,6 +22,14 @@
 
 <style scoped>
 
+.balanceContainer {
+  padding: 1rem;
+  background-color: lightgray;
+  border: 1px solid blue;
+  border-radius: 5px;;
+  width: 50%;
+
+}
 </style>
 
 <script>
