@@ -39,6 +39,12 @@ export default {
     return {
       categories: [], // store the possible categories
       board: {}, // stores trivia questions from the API
+      players: [
+        {id: 1, balance: 0},
+        {id: 2, balance: 0},
+        {id: 3, balance: 0}
+      ],
+      currentPlayerIndex: 0,
       loading: false, // loading status
       error: null, // error message if one exists
       QUESTIONS_PER_CATEGORY
@@ -83,12 +89,15 @@ export default {
     async fetchQuestion(categoryId, difficulty) {
       try {
         console.log(`fetching questions with cat: ${categoryId} and diff: ${difficulty}`);
-        const response = await fetch(`https://opentdb.com/api.php?amount=1&category=${categoryId}&difficulty=${difficulty}`)
+        const response = await fetch(`https://opentdb.com/api.php?amount=1&category=${categoryId}&difficulty=${difficulty}&type=boolean`)
         return await response.json();
       } catch(error) {
         this.error = "Failed to fetch question";
         console.error(error);
       }
+    },
+    selectNextPlayer() {
+
     }
 
   },
@@ -98,12 +107,18 @@ export default {
   }
 }
 
-
-
 </script>
 
 <template>
+  <div  class="playerDisplay">
+    <div v-for="p in players" class="playerInfo">
+      <p>Player {{ p.id}}</p>
+      <p>Balance: {{p.balance}}</p>
+    </div>
+
+  </div>
   <div class="gameBoardContainer">
+
     <p v-if="loading">Loading categories..</p>
     <p v-else-if="error">{{ error }}</p>
 
@@ -121,7 +136,7 @@ export default {
             class="cell questionCell"
             @click="handleQuestionClick(category, i - 1)"
         >
-          Q {{ i }}
+          ${{ i  }}00
         </article>
       </div>
     </template>
@@ -129,6 +144,30 @@ export default {
 </template>
 
 <style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.playerDisplay {
+  display: flex;
+  gap: 1rem;
+}
+.playerInfo:hover {
+  cursor: pointer;
+  background-color: gray;
+  opacity: 95%;
+}
+
+.activePlayer {
+  border: 1px solid green;
+}
+
+.playerInfo {
+  border: 1px solid white;
+  padding: 0.5rem;
+  border-radius: 5px;
+}
 
 .gameBoardContainer {
   display: grid;
