@@ -47,7 +47,13 @@ export default {
       currentPlayerIndex: 0,
       loading: false, // loading status
       error: null, // error message if one exists
-      QUESTIONS_PER_CATEGORY
+      QUESTIONS_PER_CATEGORY,
+      // modal state
+      showModal: false,
+      modalCategory: null,
+      modalQuestion: null,
+      modalKey: null,
+      modalValue: null
     }
   },
   methods: {
@@ -69,22 +75,27 @@ export default {
       }
 
     },
-    handleQuestionClick(category, rowIndex) {
-      console.log(`Clicked ${category.name}, row ${rowIndex + 1}`)
-      let difficulty = "";
-      switch (rowIndex) {
-        case 0:
-        case 1 :
-          difficulty = "easy";
-          break;
-        case 4:
-          difficulty = "hard";
-          break;
-        default:
-          difficulty = "medium";
-      }
-      const question = this.fetchQuestion(category.id, difficulty);
+    async handleQuestionClick(category, rowIndex) {
+      const key = `${category.id}-${rowIndex}`; // used for updating after answer
+
+      // determine difficulty
+      let difficulty = "medium";
+      if (rowIndex === 0 || rowIndex === 1) difficulty = "easy";
+      else if (rowIndex === 4) difficulty = "hard";
+
+      const questionData = await this.fetchQuestion(category.id, difficulty);
+      const question = questionData?.results[0] // grab the question data
+      // do nothing if question doesn't exist
+      if (!question) return;
+
       console.log("got question: ", question);
+
+      // setup modal
+      this.modalCategory =  category;
+      this.modalQuestion = question;
+      this.modalValue = (rowIndex + 1) * 100;
+      this.modalKey = key;
+      this.showModal = true;
     },
     async fetchQuestion(categoryId, difficulty) {
       try {
@@ -98,12 +109,18 @@ export default {
     },
     selectNextPlayer() {
 
-    }
+      if (this.currentPlayerIndex === this.players.length - 1) {
+        this.currentPlayerIndex = 0;
+      } else {
+        this.currentPlayerIndex++;
+      }
+    },
+
+
 
   },
   mounted() {
     this.fetchCategories(); // fetch categories on mount
-
   }
 }
 
@@ -111,7 +128,11 @@ export default {
 
 <template>
   <div  class="playerDisplay">
-    <div v-for="p in players" class="playerInfo">
+    <div v-for="(p, index) in players"
+         class="playerInfo"
+         :key="p.id"
+         :class="{ activePlayer: index === currentPlayerIndex }"
+    >
       <p>Player {{ p.id}}</p>
       <p>Balance: {{p.balance}}</p>
     </div>
@@ -136,11 +157,24 @@ export default {
             class="cell questionCell"
             @click="handleQuestionClick(category, i - 1)"
         >
-          ${{ i  }}00
+          ${{ i  * 100 }}
         </article>
       </div>
     </template>
   </div>
+
+<!--  modal for questions -->
+  <div v-if="showModal" class="modalOverlay" @click.self="closeModal">
+    <div>
+      <h3>{{ modalCategory.name }} - ${{ modalValue }}</h3>
+      <p v-html="modalQuestion.question"></p>
+      <div class="modalButtons">
+        <button @click="answerQuestion('True')">True</button>
+        <button @click="answerQuestion('False')">False</button>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <style scoped>
@@ -155,12 +189,13 @@ export default {
 }
 .playerInfo:hover {
   cursor: pointer;
-  background-color: gray;
-  opacity: 95%;
+  opacity: 90%;
 }
 
 .activePlayer {
-  border: 1px solid green;
+  color: goldenrod;
+  font-weight: bold;
+  border: 3px solid goldenrod;
 }
 
 .playerInfo {
