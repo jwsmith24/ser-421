@@ -13,22 +13,20 @@ function filterCategories(data) {
 function getRandomIndex(size) {
   return Math.floor(Math.random() * size);
 }
-// helper to select 4 random, unique categories from the filtered list
-function selectCategories(data) {
-  const selected = [];
-  let randomIndex = getRandomIndex(data.length);
 
-  while (selected.length < CATEGORY_COUNT) {
-    const choice = data[randomIndex];
+// helper to select 4 random, unique categories from the filtered list
+function selectCategories(data, count) {
+  const selected = [];
+
+  while (selected.length < count) {
+    const choice = data[getRandomIndex(data.length)];
     // if category isn't already selected, add it otherwise skip it
     if (!selected.some((selected) => choice.id === selected.id)) {
       selected.push(choice);
     }
 
-    randomIndex = getRandomIndex(data.length) // get new random index
   }
 
-  console.log("selected: ", selected)
   return selected;
 }
 
@@ -66,6 +64,11 @@ export default {
       wager: null,
       wagerConfirmed: false,
 
+      // dynamic player state (with defaults set)
+      playerCount: 3,
+      categoryCount: 4,
+      setupActive: true,
+
     }
   },
   methods: {
@@ -77,7 +80,7 @@ export default {
         const data = await response.json();
         // filter out bad categories (use set for constant lookup)
         const filtered = filterCategories(data.trivia_categories);
-        this.categories = selectCategories(filtered);
+        this.categories = selectCategories(filtered, this.categoryCount);
 
       } catch (error) {
         this.error = "Failed to retrieve categories";
@@ -111,27 +114,15 @@ export default {
         }
 
         // setup modal
-        this.modalCategory =  category;
+        this.modalCategory = category;
         this.modalQuestion = question;
         this.modalValue = (rowIndex + 1) * 100;
         this.modalKey = key;
 
         // 10 % chance to trigger dj
-        this.doubleJeopardy = Math.random() < 1; // todo: 100% for testing
+        this.doubleJeopardy = Math.random() < .10;
         this.wager = null;
         this.wagerConfirmed = false;
-
-        // if dj triggers and player balance is less than face value, auto set the wager to the face value of the question
-        if (this.doubleJeopardy) {
-          const playerBalance = this.players[this.currentPlayerIndex].balance;
-          if (playerBalance < this.modalValue) {
-            this.wager = this.modalValue;
-            this.wagerConfirmed = true; // skip wager input
-          } else {
-            // default wager to face value
-            this.wager = this.modalValue;
-          }
-        }
 
 
         this.showModal = true;
@@ -166,7 +157,7 @@ export default {
         }
 
         return await response.json();
-      } catch(error) {
+      } catch (error) {
         this.error = "Failed to fetch question";
         console.error(error);
         return null;
@@ -259,6 +250,8 @@ export default {
     },
 
     restartGame() {
+      this.resetPlayers();
+      this.setupActive = true; // bring back setup screen for next game
       this.players.forEach(p => p.balance = 0);
       this.currentPlayerIndex = 0;
       this.usedQuestions = {};
@@ -285,20 +278,56 @@ export default {
 
       this.wagerConfirmed = true;
 
+    },
+    resetPlayers() {
+      // map new array of players based on count
+      this.players = Array.from({length: this.playerCount}, (_, i) => ({
+        id: i + 1,
+        balance: 0
+      }));
+    },
+    startGame() {
+      if (!this.validatePlayerAndCategoryCounts()) return;
+      this.resetPlayers();
+      this.players.forEach(p => p.balance = 0);
+      this.currentPlayerIndex = 0;
+      this.usedQuestions = {};
+      this.closeModal(); // reset modal related state
+      this.gameOver = false;
+      this.winner = null;
+
+      // get new categories
+      this.fetchCategories();
+      this.setupActive =  false;
+    },
+    validatePlayerAndCategoryCounts() {
+      if (this.playerCount < 2 || this.playerCount > 6) {
+        alert("Players must be between 2 and 6");
+        this.playerCount = 2; // reset input to min value
+        return false;
+      }
+      if (this.categoryCount < 2 || this.categoryCount > 6) {
+        alert("Categories must be between 2 and 6");
+        this.categoryCount = 2; // reset input to min value
+        return false;
+      }
+
+      return true;
     }
 
   },
   mounted() {
+    this.resetPlayers();
     this.fetchCategories(); // fetch categories on mount
   },
   computed: {
-    // if balance allows for a minimum value
+    // minimum will always be the question face value
     minWager() {
-      return 1;
+      return this.modalValue
     },
     // max is at least the value of the question or up to the player's balance
     maxWager() {
-      return this.players[this.currentPlayerIndex].balance;
+      return Math.max(this.players[this.currentPlayerIndex].balance, this.modalValue);
     }
   }
 }
@@ -306,18 +335,40 @@ export default {
 </script>
 
 <template>
-  <div  class="playerDisplay">
+
+<!--  dynamic player / cat count selection -->
+  <div
+      v-if="setupActive"
+      class="gameSetup"
+  >
+    <label>Number of players:
+      <input type="number" v-model.number="playerCount" min="2" max="6">
+    </label>
+
+    <label>Number of categories:
+      <input type="number" v-model.number="categoryCount" min="2" max="6">
+    </label>
+    <button @click="startGame">Start Game</button>
+  </div>
+
+  <div v-else>
+  <div class="playerDisplay">
     <div v-for="(p, index) in players"
          class="playerInfo"
          :key="p.id"
          :class="{ activePlayer: index === currentPlayerIndex }"
     >
-      <p>Player {{ p.id}}</p>
-      <p>Balance: {{p.balance}}</p>
+      <p>Player {{ p.id }}</p>
+      <p>Balance: {{ p.balance }}</p>
     </div>
 
   </div>
-  <div class="gameBoardContainer">
+<!--  dynamically size board columns-->
+  <div
+      class="gameBoardContainer"
+      :style="{ gridTemplateColumns: `repeat(${categoryCount}, 1fr)`}"
+
+  >
 
     <p v-if="categoryLoading">Loading categories..</p>
     <p v-else-if="error">{{ error }}</p>
@@ -341,15 +392,16 @@ export default {
             ${{ i * 100 }}
           </template>
           <template v-else>
-            P{{ usedQuestions[`${category.id}-${i-1}`].playerId }}
+            P{{ usedQuestions[`${category.id}-${i - 1}`].playerId }}
           </template>
         </article>
       </div>
     </template>
     <div v-if="questionLoading">Avoiding rate limit...</div>
   </div>
+  </div>
 
-<!--  modal for questions -->
+  <!--  modal for questions -->
   <div v-if="showModal" class="modalOverlay" @click.self="closeModal">
 
     <div v-if="doubleJeopardy && !wagerConfirmed">
@@ -358,7 +410,7 @@ export default {
         <input type="number"
                v-model.number="wager"
                :min="minWager"
-               :max="maxWager" >
+               :max="maxWager">
       </label>
       <button @click="confirmWager">Confirm Wager</button>
     </div>
@@ -368,7 +420,7 @@ export default {
       <h3>{{ modalCategory.name }} -
         <span v-if="doubleJeopardy">Wager: ${{ wager }}</span>
         <span v-else>${{ modalValue }}</span>
-        </h3>
+      </h3>
       <p v-html="modalQuestion.question"></p>
       <p v-if="feedback" :style="{ color: feedback === 'Correct!' ? 'green' : 'red' }">
         {{ feedback }}
@@ -380,7 +432,7 @@ export default {
     </div>
   </div>
 
-<!--  game over modal-->
+  <!--  game over modal-->
   <div v-if="gameOver" class="gameOverModal">
     <h2>Game Over!</h2>
     <p>{{ winner }}</p>
@@ -395,10 +447,12 @@ export default {
   padding: 0;
   box-sizing: border-box;
 }
+
 .playerDisplay {
   display: flex;
   gap: 1rem;
 }
+
 .playerInfo:hover {
   cursor: pointer;
   opacity: 90%;
@@ -418,7 +472,6 @@ export default {
 
 .gameBoardContainer {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: .8rem;
   text-align: center;
   height: 100vh;
@@ -484,7 +537,7 @@ export default {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -533,7 +586,6 @@ export default {
 }
 
 
-
 .modalContent {
   display: grid;
   gap: 1rem;
@@ -544,9 +596,11 @@ export default {
 
 .gameOverModal {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.9);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
   color: white;
   display: flex;
   flex-direction: column;
@@ -558,6 +612,21 @@ export default {
 .gameOverModal h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
+}
+
+.gameSetup {
+  display: grid;
+  gap: 1rem;
+}
+
+.gameSetup > label {
+  border: 1px solid whitesmoke;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.gameSetup > button {
+  padding: 1rem;
 }
 
 </style>
