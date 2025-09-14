@@ -61,6 +61,11 @@ export default {
       modalValue: null,
       feedback: null, // correct or incorrect
 
+      // double Jeopardy state
+      doubleJeopardy: false,
+      wager: null,
+      wagerConfirmed: false,
+
     }
   },
   methods: {
@@ -110,6 +115,25 @@ export default {
         this.modalQuestion = question;
         this.modalValue = (rowIndex + 1) * 100;
         this.modalKey = key;
+
+        // 10 % chance to trigger dj
+        this.doubleJeopardy = Math.random() < 1; // todo: 100% for testing
+        this.wager = null;
+        this.wagerConfirmed = false;
+
+        // if dj triggers and player balance is less than face value, auto set the wager to the face value of the question
+        if (this.doubleJeopardy) {
+          const playerBalance = this.players[this.currentPlayerIndex].balance;
+          if (playerBalance < this.modalValue) {
+            this.wager = this.modalValue;
+            this.wagerConfirmed = true; // skip wager input
+          } else {
+            // default wager to face value
+            this.wager = this.modalValue;
+          }
+        }
+
+
         this.showModal = true;
 
         console.log("got question: ", question);
@@ -163,6 +187,9 @@ export default {
       this.modalKey = null;
       this.modalValue = null;
       this.feedback = null;
+      this.doubleJeopardy = false;
+      this.wagerConfirmed = false;
+      this.wager = null;
     },
     answerQuestion(answer) {
       if (!this.modalQuestion) return;
@@ -175,10 +202,13 @@ export default {
       // update player balance
       const player = this.players[this.currentPlayerIndex];
 
+      // apply double jeopardy wager if active
+      const amount = this.doubleJeopardy && this.wager ? this.wager : this.modalValue;
+
       if (correct) {
-        player.balance += this.modalValue; // gain money on correct answer
+        player.balance += amount; // gain money on correct answer
       } else {
-        player.balance -= this.modalValue; // lose money on wrong answer
+        player.balance -= amount; // lose money on wrong answer
       }
 
       // update game board cell
@@ -232,24 +262,44 @@ export default {
       this.players.forEach(p => p.balance = 0);
       this.currentPlayerIndex = 0;
       this.usedQuestions = {};
-      this.showModal = false;
-      this.modalCategory = null;
-      this.modalQuestion = null;
-      this.modalKey = null;
-      this.modalValue = null;
-      this.feedback = null;
+      this.closeModal(); // reset modal related state
       this.gameOver = false;
       this.winner = null;
 
       // get new categories
       this.fetchCategories();
+    },
+    confirmWager() {
+      if (this.wager === null) return;
+
+      if (this.wager > this.maxWager) {
+        alert(`Wager cannot exceed $${this.maxWager}`);
+        return;
+      }
+
+      if (this.wager < this.minWager) {
+        alert(`Wager must be at least $${this.minWager}`);
+        return;
+
+      }
+
+      this.wagerConfirmed = true;
+
     }
-
-
 
   },
   mounted() {
     this.fetchCategories(); // fetch categories on mount
+  },
+  computed: {
+    // if balance allows for a minimum value
+    minWager() {
+      return 1;
+    },
+    // max is at least the value of the question or up to the player's balance
+    maxWager() {
+      return this.players[this.currentPlayerIndex].balance;
+    }
   }
 }
 
@@ -301,8 +351,24 @@ export default {
 
 <!--  modal for questions -->
   <div v-if="showModal" class="modalOverlay" @click.self="closeModal">
-    <div v-if="modalQuestion" class="modalContent">
-      <h3>{{ modalCategory.name }} - ${{ modalValue }}</h3>
+
+    <div v-if="doubleJeopardy && !wagerConfirmed">
+      <p>Double Jeopardy!</p>
+      <label>Wager:
+        <input type="number"
+               v-model.number="wager"
+               :min="minWager"
+               :max="maxWager" >
+      </label>
+      <button @click="confirmWager">Confirm Wager</button>
+    </div>
+
+
+    <div v-else-if="modalQuestion" class="modalContent">
+      <h3>{{ modalCategory.name }} -
+        <span v-if="doubleJeopardy">Wager: ${{ wager }}</span>
+        <span v-else>${{ modalValue }}</span>
+        </h3>
       <p v-html="modalQuestion.question"></p>
       <p v-if="feedback" :style="{ color: feedback === 'Correct!' ? 'green' : 'red' }">
         {{ feedback }}
