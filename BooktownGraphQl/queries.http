@@ -1,0 +1,12 @@
+# curl -X POST http://localhost:8080/graphql 
+#  -H "Content-Type: application/json" 
+#  -d '{"query":"{ authors { id lastName firstname } }"}'
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ authors { id lastName firstName } }"
+}
+
+###
+
