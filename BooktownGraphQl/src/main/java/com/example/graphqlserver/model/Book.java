@@ -1,17 +1,30 @@
 package com.example.graphqlserver.model;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Book {
+    @Id
     private String isbn;
+
     private String title;
 
-    private int authorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Author author;
 
-    public Book(String isbn, String title, int authorId) {
+    public Book(String isbn, String title, Author author) {
         this.isbn = isbn;
         this.title = title;
-        this.authorId = authorId;
+        this.author = author;
     }
 
+    // no args constructor for jpa
+    public Book() {
+
+    }
+
+    // getters & setters
     public String getIsbn() {
         return isbn;
     }
@@ -28,11 +41,11 @@ public class Book {
         this.title = title;
     }
 
-    public int getAuthorId() {
-        return authorId;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 }

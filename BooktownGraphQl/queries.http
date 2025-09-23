@@ -1,12 +1,97 @@
-# curl -X POST http://localhost:8080/graphql 
-#  -H "Content-Type: application/json" 
-#  -d '{"query":"{ authors { id lastName firstname } }"}'
+### Get all authors
 POST http://localhost:8080/graphql
 Content-Type: application/json
 
 {
-  "query": "{ authors { id lastName firstName } }"
+  "query": "{ authors { id firstName lastName } }"
 }
 
 ###
 
+### Get author by ID
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ authorById(id: 1) { id firstName lastName books { isbn title } } }"
+}
+
+###
+
+### Get authors by last name
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ authorsByLastName(lastName: \"Frost\") { id firstName lastName } }"
+}
+
+###
+
+### Get all books
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ books { isbn title authorId } }"
+}
+
+###
+
+### Get book by ISBN
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ bookByISBN(isbn: \"111\") { isbn title authorId } }"
+}
+
+###
+
+### Task 1: Books by author ID
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ booksByAuthorId(authorId: 1) { isbn title authorId } }"
+}
+
+###
+
+### Task 2: Authors by last name (already covered above but kept for clarity)
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ authorsByLastName(lastName: \"Fowler\") { id firstName lastName } }"
+}
+
+###
+
+### Task 3: Update author first name
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { updateAuthorFirstName(id: 1, newFirstName: \"Doug\") { oldFirstName } }"
+}
+
+###
+
+### Task 4: Delete book by ISBN
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { deleteBook(isbn: \"111\") }"
+}
+
+###
+
+### Task 5: Book titles by author’s first name
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ bookTitlesByAuthorFirstName(firstName: \"Robert\") }"
+}
