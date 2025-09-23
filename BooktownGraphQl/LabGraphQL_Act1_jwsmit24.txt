@@ -1,0 +1,51 @@
+Activity 1:
+
+query Query1 {
+  company {
+    name
+    founded
+    ceo
+    coo
+    cto
+    employees
+  }
+  roadster {
+    apoapsis_au
+  }
+}
+
+//////////////////////////////////////////
+
+query Query2 {
+  launchesPast(limit: 2, sort: "launch_date_local", order: "asc") {
+    launch_date_local
+    links {
+      article_link
+    }
+    rocket {
+      rocket_name
+      rocket_type
+    }
+  }
+}
+
+//////////////////////////////////////////
+
+query Query3 {
+  roadster {
+    details
+    launch_date_utc
+  }
+  rockets (limit: 3){
+    name
+    boosters
+    company
+    landing_legs {
+      material
+    }
+  }
+}
+
+
+
+
