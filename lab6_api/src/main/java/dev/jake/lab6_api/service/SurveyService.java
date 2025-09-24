@@ -55,6 +55,9 @@ public class SurveyService {
         Survey survey = getSurveyById(surveyId);
         SurveyItem item = getItemById(itemId);
 
+        // make sure item isn't already on the survey
+        // handle that error
+
         survey.addItem(item);
 
         return surveyRepository.save(survey);
