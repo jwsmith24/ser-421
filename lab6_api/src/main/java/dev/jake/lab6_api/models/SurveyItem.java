@@ -22,6 +22,11 @@ public class SurveyItem {
     private String questionStem;
 
     @ElementCollection
+    @CollectionTable(
+            name = "survey_item_possible_answers",
+            joinColumns = @JoinColumn(name = "survey_item_id")
+    )
+    @Column(name = "answer")
     private List<String> possibleAnswers;
 
     private String correctAnswer;

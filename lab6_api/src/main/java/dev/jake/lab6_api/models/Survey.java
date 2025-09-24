@@ -34,4 +34,8 @@ public class Survey {
 
     @Enumerated(EnumType.STRING)
     private SurveyState state = SurveyState.CREATED;
+
+    public void addItem(SurveyItem item) {
+        this.items.add(item);
+    }
 }

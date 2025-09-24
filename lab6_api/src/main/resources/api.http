@@ -1,0 +1,46 @@
+
+### Create a new survey
+POST http://localhost:8080/api/v1/survey
+Content-Type: application/json
+
+{
+  "title": "test survey"
+}
+
+### Get all surveys
+GET http://localhost:8080/api/v1/survey
+
+
+
+### Add item to survey
+POST http://localhost:8080/api/v1/survey/items
+Content-Type: application/json
+
+{
+  "questionStem": "This is a question?",
+  "possibleAnswers": [
+    "Answer 1",
+    "Answer 2",
+    "Answer 3"
+  ],
+  "correctAnswer": "Answer 2"
+}
+
+### Get survey by id
+GET http://localhost:8080/api/v1/survey/1
+
+
+### Get all survey items
+GET http://localhost:8080/api/v1/survey/items
+
+### Get survey item by id
+GET http://localhost:8080/api/v1/survey/items/2
+
+### associate item with survey
+POST http://localhost:8080/api/v1/survey/map
+Content-Type: application/json
+
+{
+  "surveyId": 1,
+  "itemId": 4
+}

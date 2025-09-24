@@ -1,0 +1,17 @@
+
+services:
+  postgres:
+    image: postgres
+    container_name: pg_survey_db
+    restart: always
+    environment:
+      POSTGRES_USER: survey_user
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: survey_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - survey_data:/var/lib/postgresql/data
+
+volumes:
+  survey_data:
