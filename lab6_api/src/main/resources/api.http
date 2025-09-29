@@ -44,3 +44,15 @@ Content-Type: application/json
   "surveyId": 1,
   "itemId": 4
 }
+
+### Create a survey instance for a user
+POST http://localhost:8080/api/v1/survey/newInstance
+Content-Type: application/json
+
+{
+  "surveyId": 1,
+  "username": "Doug"
+}
+
+### Get survey instance (by id)
+GET http://localhost:8080/api/v1/survey/instance/4

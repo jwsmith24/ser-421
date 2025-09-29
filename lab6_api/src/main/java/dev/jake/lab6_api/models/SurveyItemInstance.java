@@ -18,10 +18,12 @@ public class SurveyItemInstance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "survey_item_id")
     private SurveyItem surveyItem;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "survey_instance_id")
     private SurveyInstance surveyInstance;
 
     private String chosenAnswer;

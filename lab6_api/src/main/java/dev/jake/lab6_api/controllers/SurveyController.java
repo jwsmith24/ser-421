@@ -1,8 +1,11 @@
 package dev.jake.lab6_api.controllers;
 
 import dev.jake.lab6_api.models.Survey;
+import dev.jake.lab6_api.models.SurveyInstance;
 import dev.jake.lab6_api.models.SurveyItem;
+import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
 import dev.jake.lab6_api.models.dto.http.AddItemToSurveyRequest;
+import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
 import dev.jake.lab6_api.service.SurveyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +31,7 @@ public class SurveyController {
 
     @GetMapping()
     public ResponseEntity<List<Survey>> getAllSurveys() {
-        return ResponseEntity.ok(surveyService.getAll());
+        return ResponseEntity.ok(surveyService.getAllSurveys());
     }
 
     @GetMapping("/{id}")
@@ -56,6 +59,17 @@ public class SurveyController {
     public ResponseEntity<Survey> addItemToSurvey(@RequestBody AddItemToSurveyRequest request) {
 
         return ResponseEntity.ok(surveyService.addItemToSurvey(request));
+    }
+
+    @PostMapping("/newInstance")
+    public ResponseEntity<SurveyInstanceDto> createSurveyInstanceForUser(@RequestBody CreateSurveyForUserRequest request) {
+        return ResponseEntity.ok(surveyService.createSurveyInstanceForUser(request));
+    }
+
+    @GetMapping("/instance/{id}")
+    public ResponseEntity<SurveyInstanceDto> getSurveyInstance(@PathVariable Long id) {
+
+        return ResponseEntity.ok(surveyService.getSurveyInstance(id));
     }
 
 }

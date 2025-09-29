@@ -33,5 +33,10 @@ public class SurveyInstance {
     @Enumerated(EnumType.STRING)
     private SurveyInstanceState state = SurveyInstanceState.CREATED;
 
+    public void addItemInstance(SurveyItemInstance instance) {
+        instance.setSurveyInstance(this); // set back ref
+        itemInstances.add(instance);
+    }
+
 
 }

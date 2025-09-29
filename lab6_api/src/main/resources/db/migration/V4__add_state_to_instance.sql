@@ -1,0 +1,2 @@
+ALTER TABLE survey_item_instance
+    ADD COLUMN state TEXT NOT NULL DEFAULT 'CREATED';
