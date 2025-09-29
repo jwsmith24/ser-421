@@ -4,8 +4,10 @@ import dev.jake.lab6_api.models.Survey;
 import dev.jake.lab6_api.models.SurveyInstance;
 import dev.jake.lab6_api.models.SurveyItem;
 import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
+import dev.jake.lab6_api.models.dto.core.SurveyItemInstanceDto;
 import dev.jake.lab6_api.models.dto.http.AddItemToSurveyRequest;
 import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
+import dev.jake.lab6_api.models.dto.http.SubmitAnswerRequest;
 import dev.jake.lab6_api.service.SurveyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,6 +72,11 @@ public class SurveyController {
     public ResponseEntity<SurveyInstanceDto> getSurveyInstance(@PathVariable Long id) {
 
         return ResponseEntity.ok(surveyService.getSurveyInstance(id));
+    }
+
+    @PatchMapping("/instance/answer")
+    public ResponseEntity<SurveyItemInstanceDto> acceptAnswerFromUser(@RequestBody SubmitAnswerRequest request) {
+        return ResponseEntity.ok(surveyService.acceptAnswer(request));
     }
 
 }

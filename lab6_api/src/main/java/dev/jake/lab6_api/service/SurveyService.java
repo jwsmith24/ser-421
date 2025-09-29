@@ -8,8 +8,11 @@ import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
 import dev.jake.lab6_api.models.dto.core.SurveyItemInstanceDto;
 import dev.jake.lab6_api.models.dto.http.AddItemToSurveyRequest;
 import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
+import dev.jake.lab6_api.models.dto.http.SubmitAnswerRequest;
+import dev.jake.lab6_api.models.state.SurveyInstanceState;
 import dev.jake.lab6_api.models.state.SurveyItemInstanceState;
 import dev.jake.lab6_api.repos.SurveyInstanceRepository;
+import dev.jake.lab6_api.repos.SurveyItemInstanceRepository;
 import dev.jake.lab6_api.repos.SurveyItemRepository;
 import dev.jake.lab6_api.repos.SurveyRepository;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,14 @@ public class SurveyService {
     private final SurveyRepository surveyRepository;
     private final SurveyItemRepository surveyItemRepository;
     private final SurveyInstanceRepository surveyInstanceRepository;
+    private final SurveyItemInstanceRepository surveyItemInstanceRepository;
 
     public SurveyService(SurveyRepository surveyRepository,
-                         SurveyItemRepository surveyItemRepository, SurveyInstanceRepository surveyInstanceRepository) {
+                         SurveyItemRepository surveyItemRepository, SurveyInstanceRepository surveyInstanceRepository, SurveyItemInstanceRepository surveyItemInstanceRepository) {
         this.surveyRepository = surveyRepository;
         this.surveyItemRepository = surveyItemRepository;
         this.surveyInstanceRepository = surveyInstanceRepository;
+        this.surveyItemInstanceRepository = surveyItemInstanceRepository;
     }
 
 
@@ -94,10 +99,44 @@ public class SurveyService {
 
     }
 
-    public SurveyInstanceDto getSurveyInstance(Long id) {
-        return toDto(surveyInstanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Survey instance not found with id" + id)));
+    // 7: accept an answer for a survey item instance on a specific survey instance (patch)
+    public SurveyItemInstanceDto acceptAnswer(SubmitAnswerRequest request) {
+        // try to find survey instance for user (throws no such element exception)
+        SurveyInstance instance = surveyInstanceRepository.findByUsername(request.username()).getFirst();
+
+        // try to find item instance
+        SurveyItemInstance itemInstance =
+                surveyItemInstanceRepository
+                        .findBySurveyInstanceId(instance.getId())
+                        .stream()
+                        .filter((item -> item.getId().equals(request.itemId())))
+                        .toList().getFirst();
+
+
+        // update chosen answer, check correct and update, update state
+        itemInstance.setChosenAnswer(request.userAnswer());
+
+        String correctAnswer = itemInstance.getSurveyItem().getCorrectAnswer();
+        itemInstance.setIsCorrect(itemInstance.getChosenAnswer().equals(correctAnswer));
+
+        itemInstance.setState(SurveyItemInstanceState.COMPLETE);
+
+        // check if entire survey instance is complete
+        List<SurveyItemInstance> unanswered = surveyItemInstanceRepository
+                .findBySurveyInstanceId(instance.getId())
+                .stream().filter((item) -> item.getState().equals(SurveyItemInstanceState.NOT_COMPLETED))
+                .toList();
+
+        if (unanswered.isEmpty()) {
+            instance.setState(SurveyInstanceState.COMPLETED);
+        } else {
+            instance.setState(SurveyInstanceState.IN_PROGRESS);
+        }
+
+        return toDto(surveyItemInstanceRepository.save(itemInstance));
+
     }
+
 
 
 
@@ -111,7 +150,14 @@ public class SurveyService {
                 "with id " + id + " does not exist"));
     }
 
-    // mapping helper
+    public SurveyInstanceDto getSurveyInstance(Long id) {
+        return toDto(surveyInstanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Survey instance not found with id" + id)));
+    }
+
+
+
+    // mapping helpers
     private SurveyInstanceDto toDto(SurveyInstance instance) {
         List<SurveyItemInstanceDto> items = instance.getItemInstances().stream()
                 .map(item -> new SurveyItemInstanceDto(
@@ -130,6 +176,17 @@ public class SurveyService {
                 instance.getSurvey().getTitle(),
                 items,
                 instance.getState()
+        );
+    }
+
+    private SurveyItemInstanceDto toDto(SurveyItemInstance itemInstance) {
+        return new SurveyItemInstanceDto(
+                itemInstance.getId(),
+                itemInstance.getSurveyItem().getId(),
+                itemInstance.getSurveyItem().getQuestionStem(),
+                itemInstance.getChosenAnswer(),
+                itemInstance.getIsCorrect(),
+                itemInstance.getState()
         );
     }
 
