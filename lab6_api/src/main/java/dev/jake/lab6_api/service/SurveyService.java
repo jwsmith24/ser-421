@@ -48,8 +48,7 @@ public class SurveyService {
     }
 
     // 3
-    public Survey addItemToSurvey(AddItemToSurveyRequest request) {
-        Long surveyId =  request.surveyId();
+    public SurveyItem addItemToSurvey(Long surveyId, AddItemToSurveyRequest request) {
         Long itemId = request.itemId();
 
         Survey survey = getSurveyById(surveyId);
@@ -59,8 +58,9 @@ public class SurveyService {
         // handle that error
 
         survey.addItem(item);
+        surveyRepository.save(survey);
 
-        return surveyRepository.save(survey);
+        return item;
     }
 
 

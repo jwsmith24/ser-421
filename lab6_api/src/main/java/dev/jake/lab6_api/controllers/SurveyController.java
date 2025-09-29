@@ -1,7 +1,6 @@
 package dev.jake.lab6_api.controllers;
 
 import dev.jake.lab6_api.models.Survey;
-import dev.jake.lab6_api.models.SurveyInstance;
 import dev.jake.lab6_api.models.SurveyItem;
 import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
 import dev.jake.lab6_api.models.dto.core.SurveyItemInstanceDto;
@@ -10,10 +9,11 @@ import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
 import dev.jake.lab6_api.models.dto.http.FindSurveyByStateRequest;
 import dev.jake.lab6_api.models.dto.http.SubmitAnswerRequest;
 import dev.jake.lab6_api.service.SurveyService;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,7 +29,12 @@ public class SurveyController {
     @PostMapping()
     public ResponseEntity<Survey> createSurvey(@RequestBody Survey survey) {
 
-        return ResponseEntity.ok(surveyService.createSurvey(survey));
+        Survey newSurvey = surveyService.createSurvey(survey);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newSurvey.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(newSurvey);
 
     }
 
@@ -46,7 +51,13 @@ public class SurveyController {
 
     @PostMapping("/items")
     public ResponseEntity<SurveyItem> createSurveyItem(@RequestBody SurveyItem item) {
-        return ResponseEntity.ok(surveyService.createSurveyItem(item));
+        SurveyItem newItem = surveyService.createSurveyItem(item);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newItem.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(newItem);
     }
 
     @GetMapping("/items")
@@ -59,29 +70,45 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.getItemById(id));
     }
 
-    @PostMapping("/map")
-    public ResponseEntity<Survey> addItemToSurvey(@RequestBody AddItemToSurveyRequest request) {
+    @PostMapping("/{surveyId}/items")
+    public ResponseEntity<SurveyItem> addItemToSurvey(
+            @PathVariable Long surveyId,
+            @RequestBody AddItemToSurveyRequest request) {
 
-        return ResponseEntity.ok(surveyService.addItemToSurvey(request));
+        SurveyItem newItem = surveyService.addItemToSurvey(surveyId, request);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("id")
+                .buildAndExpand(newItem.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(newItem);
     }
 
-    @PostMapping("/newInstance")
+    @PostMapping("/instances")
     public ResponseEntity<SurveyInstanceDto> createSurveyInstanceForUser(@RequestBody CreateSurveyForUserRequest request) {
-        return ResponseEntity.ok(surveyService.createSurveyInstanceForUser(request));
+
+        SurveyInstanceDto newService = surveyService.createSurveyInstanceForUser(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newService.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(newService);
     }
 
-    @GetMapping("/instance/{id}")
+    @GetMapping("/instances/{id}")
     public ResponseEntity<SurveyInstanceDto> getSurveyInstance(@PathVariable Long id) {
 
         return ResponseEntity.ok(surveyService.getSurveyInstance(id));
     }
 
-    @PatchMapping("/instance/answer")
+    @PatchMapping("/instances/answer")
     public ResponseEntity<SurveyItemInstanceDto> acceptAnswerFromUser(@RequestBody SubmitAnswerRequest request) {
         return ResponseEntity.ok(surveyService.acceptAnswer(request));
     }
 
-    @GetMapping("/instance")
+    @GetMapping("/instances")
     public ResponseEntity<List<SurveyInstanceDto>> getAllSurveyInstancesByState(@RequestBody(required = false) FindSurveyByStateRequest request) {
         if (request == null) {
             return ResponseEntity.ok(surveyService.findSurveysByState(null));
