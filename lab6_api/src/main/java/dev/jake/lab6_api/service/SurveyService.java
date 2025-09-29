@@ -157,7 +157,13 @@ public class SurveyService {
     }
 
     // 10: delete specific survey
+    public void deleteSurvey(Long id) {
+        // check if survey exists
+        Survey target = surveyRepository.findById(id).orElseThrow(() -> new RuntimeException("No " +
+                "survey exists with ID: " + id));
 
+        surveyRepository.delete(target);
+    }
 
 
     // extra for testing

@@ -4,12 +4,14 @@ POST http://localhost:8080/api/v1/survey
 Content-Type: application/json
 
 {
-  "title": "test survey"
+  "title": "test survey 2"
 }
 
 ### Get all surveys
 GET http://localhost:8080/api/v1/survey
 
+### Delete a survey
+DELETE http://localhost:8080/api/v1/survey/2
 
 
 ### Add item to survey

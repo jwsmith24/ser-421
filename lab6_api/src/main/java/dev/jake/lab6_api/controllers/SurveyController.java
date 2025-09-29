@@ -90,5 +90,11 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.findSurveysByState(request.state()));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSurvey(@PathVariable Long id) {
+        surveyService.deleteSurvey(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
