@@ -8,6 +8,7 @@ import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
 import dev.jake.lab6_api.models.dto.core.SurveyItemInstanceDto;
 import dev.jake.lab6_api.models.dto.http.AddItemToSurveyRequest;
 import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
+import dev.jake.lab6_api.models.dto.http.FindSurveyByStateRequest;
 import dev.jake.lab6_api.models.dto.http.SubmitAnswerRequest;
 import dev.jake.lab6_api.models.state.SurveyInstanceState;
 import dev.jake.lab6_api.models.state.SurveyItemInstanceState;
@@ -137,6 +138,25 @@ public class SurveyService {
 
     }
 
+    // 8
+    public List<SurveyInstanceDto> findSurveysByState(String state) {
+        if (state == null) {
+            return surveyInstanceRepository.findAll().stream().map(this::toDto).toList();
+        }
+
+        // throws illegal state exception
+        SurveyInstanceState targetState = SurveyInstanceState.valueOf(state);
+
+        return surveyInstanceRepository.findByState(targetState).stream().map(this::toDto).toList();
+    }
+
+    // 9
+    public SurveyInstanceDto getSurveyInstance(Long id) {
+        return toDto(surveyInstanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Survey instance not found with id" + id)));
+    }
+
+    // 10: delete specific survey
 
 
 
@@ -150,10 +170,7 @@ public class SurveyService {
                 "with id " + id + " does not exist"));
     }
 
-    public SurveyInstanceDto getSurveyInstance(Long id) {
-        return toDto(surveyInstanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Survey instance not found with id" + id)));
-    }
+
 
 
 
