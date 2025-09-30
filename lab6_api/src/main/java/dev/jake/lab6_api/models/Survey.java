@@ -24,7 +24,7 @@ public class Survey {
     private String title;
 
     // 0-5 items allowed
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "survey_items",
             joinColumns = @JoinColumn(name = "survey_id"),

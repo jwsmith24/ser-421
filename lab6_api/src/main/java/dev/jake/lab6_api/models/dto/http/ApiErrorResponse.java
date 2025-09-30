@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 public record ApiErrorResponse(
         String message,
         int status,
-        LocalDateTime timeStamp
+        LocalDateTime timeStamp,
+        String error,
+        String path
 ) {
 }

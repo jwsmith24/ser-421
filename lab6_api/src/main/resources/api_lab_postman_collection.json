@@ -1,0 +1,539 @@
+{
+  "info": {
+    "name": "Survey API Lab Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "survey-api-lab-tests-001"
+  },
+  "item": [
+    {
+      "name": "Create Survey Item - Pass",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/items",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"questionStem\": \"What is 2 + 2?\",\n  \"possibleAnswers\": [\n    \"2\",\n    \"3\",\n    \"4\",\n    \"5\"\n  ],\n  \"correctAnswer\": \"4\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Survey Item - Fail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/items",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"questionStem\": \"Missing answers\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Survey - Pass",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Math Quiz\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Survey - Fail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "Add Item to Survey - Pass",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/1/items",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "1",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"itemId\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "Add Item to Survey - Fail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/999/items",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "999",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"itemId\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "Get All Surveys - Pass",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Surveys - Fail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey?badParam=true",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey?badParam=true"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Survey by ID - Pass",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/1",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Survey by ID - Fail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/999",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "999"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Survey Instance - Pass",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"surveyId\": 1,\n  \"username\": \"alice\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Survey Instance - Fail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"surveyId\": 999,\n  \"username\": \"bob\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Accept Answer - Pass",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances/answer",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances",
+            "answer"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alice\",\n  \"itemId\": 1,\n  \"userAnswer\": \"4\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Accept Answer - Fail",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances/answer",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances",
+            "answer"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alice\",\n  \"itemId\": 999,\n  \"userAnswer\": \"anything\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get All Instances - Pass",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"state\": \"COMPLETED\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get All Instances - Fail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"state\": \"INVALID_STATE\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Survey Instance - Pass",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances/1",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Survey Instance - Fail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/instances/999",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "instances",
+            "999"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Survey - Pass",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/1",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Survey - Fail",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/survey/999",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "survey",
+            "999"
+          ]
+        }
+      }
+    }
+  ]
+}

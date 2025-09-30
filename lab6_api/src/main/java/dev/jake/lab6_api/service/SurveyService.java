@@ -1,14 +1,14 @@
 package dev.jake.lab6_api.service;
 
+import dev.jake.lab6_api.exceptions.DuplicateResourceException;
+import dev.jake.lab6_api.exceptions.ResourceNotFoundException;
 import dev.jake.lab6_api.models.Survey;
 import dev.jake.lab6_api.models.SurveyInstance;
 import dev.jake.lab6_api.models.SurveyItem;
 import dev.jake.lab6_api.models.SurveyItemInstance;
-import dev.jake.lab6_api.models.dto.core.SurveyInstanceDto;
-import dev.jake.lab6_api.models.dto.core.SurveyItemInstanceDto;
+import dev.jake.lab6_api.models.dto.core.*;
 import dev.jake.lab6_api.models.dto.http.AddItemToSurveyRequest;
 import dev.jake.lab6_api.models.dto.http.CreateSurveyForUserRequest;
-import dev.jake.lab6_api.models.dto.http.FindSurveyByStateRequest;
 import dev.jake.lab6_api.models.dto.http.SubmitAnswerRequest;
 import dev.jake.lab6_api.models.state.SurveyInstanceState;
 import dev.jake.lab6_api.models.state.SurveyItemInstanceState;
@@ -16,9 +16,12 @@ import dev.jake.lab6_api.repos.SurveyInstanceRepository;
 import dev.jake.lab6_api.repos.SurveyItemInstanceRepository;
 import dev.jake.lab6_api.repos.SurveyItemRepository;
 import dev.jake.lab6_api.repos.SurveyRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static dev.jake.lab6_api.models.dto.core.MapperUtil.toDto;
 
 @Service
 public class SurveyService {
@@ -38,25 +41,32 @@ public class SurveyService {
 
 
     // 1
-    public SurveyItem createSurveyItem(SurveyItem item) {
-        return surveyItemRepository.save(item);
+    public SurveyItem createSurveyItem(SurveyItemDto item) {
+
+        return surveyItemRepository.save(MapperUtil.fromDto(item));
     }
 
     // 2
-    public Survey createSurvey(Survey survey) {
-        return surveyRepository.save(survey);
+    public Survey createSurvey(SurveyDto survey) {
+        return surveyRepository.save(MapperUtil.fromDto(survey));
     }
 
     // 3
     public SurveyItem addItemToSurvey(Long surveyId, AddItemToSurveyRequest request) {
         Long itemId = request.itemId();
 
+        // Fetch survey and item (will throw 404 if not found)
         Survey survey = getSurveyById(surveyId);
         SurveyItem item = getItemById(itemId);
 
-        // make sure item isn't already on the survey
-        // handle that error
+        // Check if the item is already on this survey
+        if (survey.getItems().stream().anyMatch(i -> i.getId().equals(itemId))) {
+            throw new DuplicateResourceException(
+                    "Item with id " + itemId + " is already part of survey " + surveyId
+            );
+        }
 
+        // Add and save
         survey.addItem(item);
         surveyRepository.save(survey);
 
@@ -71,12 +81,13 @@ public class SurveyService {
 
     // 5 (many-to-many retrieves associated items)
     public Survey getSurveyById(Long id) {
-        return surveyRepository.findById(id).orElseThrow(() -> new RuntimeException("Survey with " +
+        return surveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Survey with " +
                 "id: " + id + " not found"));
     }
 
     // 6: create a survey instance of survey for a user, with associated set of survey item
     // instances
+    @Transactional
     public SurveyInstanceDto createSurveyInstanceForUser(CreateSurveyForUserRequest request) {
 
         // make sure concrete survey exists (it'll throw an error if not found)
@@ -95,71 +106,85 @@ public class SurveyService {
 
         }));
 
+        SurveyInstance saved = surveyInstanceRepository.save(instance);
 
-        return toDto(surveyInstanceRepository.save(instance));
+        // force load items before mapping
+        int size = saved.getItemInstances().size();
+
+        return MapperUtil.toDto(saved);
+
 
     }
 
     // 7: accept an answer for a survey item instance on a specific survey instance (patch)
+    @Transactional
     public SurveyItemInstanceDto acceptAnswer(SubmitAnswerRequest request) {
-        // try to find survey instance for user (throws no such element exception)
-        SurveyInstance instance = surveyInstanceRepository.findByUsername(request.username()).getFirst();
+        // Find survey instance by username
+        SurveyInstance instance = surveyInstanceRepository.findByUsername(request.username())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Survey instance not found for user " + request.username()
+                ));
 
-        // try to find item instance
-        SurveyItemInstance itemInstance =
-                surveyItemInstanceRepository
-                        .findBySurveyInstanceId(instance.getId())
-                        .stream()
-                        .filter((item -> item.getId().equals(request.itemId())))
-                        .toList().getFirst();
+        // Load all item instances for this survey instance
+        List<SurveyItemInstance> allItems = surveyItemInstanceRepository.findBySurveyInstanceId(instance.getId());
 
+        // Find the specific item instance by SurveyItem.id
+        SurveyItemInstance itemInstance = allItems.stream()
+                .filter(item -> item.getSurveyItem().getId().equals(request.itemId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Item " + request.itemId() + " not found in survey instance " + instance.getId()
+                ));
 
-        // update chosen answer, check correct and update, update state
-        itemInstance.setChosenAnswer(request.userAnswer());
-
-        String correctAnswer = itemInstance.getSurveyItem().getCorrectAnswer();
-        itemInstance.setIsCorrect(itemInstance.getChosenAnswer().equals(correctAnswer));
-
-        itemInstance.setState(SurveyItemInstanceState.COMPLETE);
-
-        // check if entire survey instance is complete
-        List<SurveyItemInstance> unanswered = surveyItemInstanceRepository
-                .findBySurveyInstanceId(instance.getId())
-                .stream().filter((item) -> item.getState().equals(SurveyItemInstanceState.NOT_COMPLETED))
-                .toList();
-
-        if (unanswered.isEmpty()) {
-            instance.setState(SurveyInstanceState.COMPLETED);
-        } else {
-            instance.setState(SurveyInstanceState.IN_PROGRESS);
+        // Prevent double-answering
+        if (itemInstance.getState() == SurveyItemInstanceState.COMPLETE) {
+            throw new DuplicateResourceException(
+                    "Item " + request.itemId() + " has already been answered"
+            );
         }
 
-        return toDto(surveyItemInstanceRepository.save(itemInstance));
+        // Update chosen answer, correctness, and state
+        itemInstance.setChosenAnswer(request.userAnswer());
+        String correctAnswer = itemInstance.getSurveyItem().getCorrectAnswer();
+        itemInstance.setIsCorrect(itemInstance.getChosenAnswer().equals(correctAnswer));
+        itemInstance.setState(SurveyItemInstanceState.COMPLETE);
 
+        // Update overall survey instance state
+        boolean allComplete = allItems.stream()
+                .allMatch(item -> item.getState() == SurveyItemInstanceState.COMPLETE);
+
+        instance.setState(allComplete ? SurveyInstanceState.COMPLETED : SurveyInstanceState.IN_PROGRESS);
+
+        // Persist and return
+        surveyInstanceRepository.save(instance); // saves both because of cascade
+        return MapperUtil.toDto(itemInstance);
     }
+
 
     // 8
     public List<SurveyInstanceDto> findSurveysByState(String state) {
         if (state == null) {
-            return surveyInstanceRepository.findAll().stream().map(this::toDto).toList();
+            return surveyInstanceRepository.findAll().stream().map(MapperUtil::toDto).toList();
         }
 
         // throws illegal state exception
         SurveyInstanceState targetState = SurveyInstanceState.valueOf(state);
 
-        return surveyInstanceRepository.findByState(targetState).stream().map(this::toDto).toList();
+        return surveyInstanceRepository.findByState(targetState).stream().map(MapperUtil::toDto).toList();
     }
 
     // 9
     public SurveyInstanceDto getSurveyInstance(Long id) {
         return toDto(surveyInstanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Survey instance not found with id" + id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Survey instance not found with id" + id)));
     }
 
     // 10: delete specific survey
     public void deleteSurvey(Long id) {
         // check if survey exists
-        Survey target = surveyRepository.findById(id).orElseThrow(() -> new RuntimeException("No " +
+        Survey target = surveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No " +
                 "survey exists with ID: " + id));
 
         surveyRepository.delete(target);
@@ -172,48 +197,9 @@ public class SurveyService {
     }
 
     public SurveyItem getItemById(Long id) {
-        return surveyItemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item " +
+        return surveyItemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item " +
                 "with id " + id + " does not exist"));
     }
-
-
-
-
-
-    // mapping helpers
-    private SurveyInstanceDto toDto(SurveyInstance instance) {
-        List<SurveyItemInstanceDto> items = instance.getItemInstances().stream()
-                .map(item -> new SurveyItemInstanceDto(
-                        item.getId(),
-                        item.getSurveyItem().getId(),
-                        item.getSurveyItem().getQuestionStem(),
-                        item.getChosenAnswer(),
-                        item.getIsCorrect(),
-                        item.getState()
-                ))
-                .toList();
-
-        return new SurveyInstanceDto(
-                instance.getId(),
-                instance.getUsername(),
-                instance.getSurvey().getTitle(),
-                items,
-                instance.getState()
-        );
-    }
-
-    private SurveyItemInstanceDto toDto(SurveyItemInstance itemInstance) {
-        return new SurveyItemInstanceDto(
-                itemInstance.getId(),
-                itemInstance.getSurveyItem().getId(),
-                itemInstance.getSurveyItem().getQuestionStem(),
-                itemInstance.getChosenAnswer(),
-                itemInstance.getIsCorrect(),
-                itemInstance.getState()
-        );
-    }
-
-
 
 
 
