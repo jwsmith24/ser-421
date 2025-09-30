@@ -1,8 +1,13 @@
-# Survey API in Spring Boot
+# Activity 1: GitHub API Calls
+
+See [labRest_act1.http](labRest_act1.http) for all required calls in the IntelliJ HTTP client.
+
+# Activity 2: Survey API in Spring Boot
 
 ## Requirements 
-This app uses a Postgres Docker container for persistence that is managed with Flyway migrations.
-If you're running in a Mac or Windows environment, ensure Docker Desktop is running.
+This app uses a Postgres image in a Docker container for persistence that is managed with Flyway 
+migrations. If you're running in a Mac or Windows environment, ensure Docker Desktop is running 
+before trying to spin up the container.
 
 ## Running the application
 

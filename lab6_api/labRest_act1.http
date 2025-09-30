@@ -1,0 +1,26 @@
+### Get Java gitignore template
+GET https://api.github.com/gitignore/templates/Java
+Accept: application/vnd.github+json
+
+
+### Get all branches
+GET https://api.github.com/repos/kgary/ser421public/branches
+Accept: application/vnd.github+json
+
+
+### Get all comments on Issue 34
+GET https://api.github.com/repos/kgary/ser421public/issues/34/comments
+Accept: application/vnd.github+json
+
+
+### Post a comment on Issue 34
+@GITHUB_TOKEN = redacted for turn in
+
+POST https://api.github.com/repos/kgary/ser421public/issues/34/comments
+Authorization: Bearer {{GITHUB_TOKEN}}
+Accept: application/vnd.github+json
+Content-Type: application/json
+
+{
+  "body": "hi from jwsmit24"
+}
